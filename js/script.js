@@ -1,4 +1,5 @@
 const APIkey='';
+const weathAPIrootUrl='https:/api.openweathermap.org';
 const searchForm=document.querySelector('#search-form');
 const searchInp=document.querySelector('#search-input');
 
@@ -7,11 +8,30 @@ function displayItems(city,data){
     displayForecast();
 };
 
+function fetchCoord(search){
+    var apiUrl=`${weathAPIrootUrl}/geo/1.0/direct?q=${search}&limit=5&appid=${APIkey}`;
+
+    fetch(apiUrl)
+        .then(function(res){
+            return res.json();
+        })
+        .then(function(data){
+            if(!data[0]){
+                alert('Location not found/invalid');
+            } else{
+                fetchWeath(data[0]);
+            }
+        })
+        .catch(function(err){
+            console.error(err);
+        })
+};
+
 function fetchWeath(location){
     var {lat}=location;
-    var {lon}=location;
+    var {long}=location;
     var city=location.name;
-    var apiUrl=`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${APIkey}`
+    var apiUrl=`${weathAPIrootUrl}/data/2.5/onecall?lat=${lat}&lon=${long}&units=imperial&exclude=minutely,hourly&appid=${APIkey}`
     
     fetch(apiUrl)
         .then(function(res){
@@ -24,3 +44,4 @@ function fetchWeath(location){
             console.error(err);
         });
 };
+
