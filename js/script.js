@@ -1,4 +1,4 @@
-const APIkey='';
+const APIkey='62c1253fea8b7649895cb12bc8bd96c4';
 const weathAPIrootUrl='https:/api.openweathermap.org';
 const searchForm=document.querySelector('#search-form');
 const searchInp=document.querySelector('#search-input');
@@ -45,3 +45,14 @@ function fetchWeath(location){
         });
 };
 
+function handleSearchFormSubmit(event){
+    if(!searchInp.value){
+        return;
+    }
+    event.preventDefault();
+    var search=searchInp.value.trim();
+    fetchCoord(search);
+    searchInp.value='';
+};
+
+searchForm.addEventListener('submit', handleSearchFormSubmit);
