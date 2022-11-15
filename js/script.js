@@ -2,7 +2,7 @@ const APIkey='62c1253fea8b7649895cb12bc8bd96c4';
 const weathAPIrootUrl='https:/api.openweathermap.org';
 const searchForm=document.querySelector('#search-form');
 const searchInp=document.querySelector('#search-input');
-const currWeathContainer=document.querySelector('#current');
+const currWeathCol=document.querySelector('#current');
 const forecastContainer=document.querySelector('#forecast');
 
 
@@ -10,7 +10,7 @@ dayjs.extend(window.dayjs_plugin_utc);
 dayjs.extend(window.dayjs_plugin_timezone);
 
 
-function displayCurrWeath(){
+function displayCurrWeath(city,weather,timezone){
     var date=dayjs().tz(timezone).format('M/D/YYYY');
     var temp=weather.temp;
     var windspd=weather.wind_speed;
@@ -38,11 +38,11 @@ function displayCurrWeath(){
     windspdEl.textContent=`Wind: ${windspd} MPH`;
     humidEl.textContent=`Humidity: ${humidity}%`;
     uviEl.textContent=`UV index: ${uvi}`;
-    currWeatherContainter.innerHTML='';
+    currWeatherCol.innerHTML='';
 
     card.append(cardBod);
     cardBod.append(head,tempEl,windspdEl,humidEl,uviEl);
-    currWeatherContainter.append(card);
+    currWeatherl.append(card);
 }
 
 function displayForecast(forecast,timezone){
@@ -51,6 +51,7 @@ function displayForecast(forecast,timezone){
     var {humid}=forecast;
     var windspd=forecast.wind_speed;
 
+    var col=document.createElement('div');
     var card=document.createElement('div');
     var cardBod=document.createElement('div');
     var head=document.createElement('h4');
@@ -58,6 +59,7 @@ function displayForecast(forecast,timezone){
     var windspdEl=document.createElement('p');
     var humidEl=document.createElement('p');
 
+    col.setAttribute('class','col-md pb-2 mx-2');
     card.setAttribute('class','card');
     cardBod.setAttribute('class','card-body');
     head.setAttribute('class','card-title');
@@ -71,14 +73,34 @@ function displayForecast(forecast,timezone){
     humidEl.textContent=`Humidity: ${humidity}%`;
     forecastContainer.innerHTML='';
 
+    col.append(card);
     card.append(cardBod);
     cardBod.append(head,tempEl,windspdEl,humidEl);
-    forecastContainer.append(card);
+    forecastContainer.append(col);
+}
+
+function displayWeekForecast(dailyForecast,timezone){
+    var startDate=dayjs().tz(timezone).add(1,'day').startOf('day').unix();
+    var endDate=dayjs().tz(timezone).add(6,'day').startOf('day').unix();
+
+    var col=document.createElement('div');
+    var head=document.createElement('h4');
+
+    col.setAttribute('class','col-10');
+    head.textContent="--Weekly Forecast--";
+
+    col.append(head);
+    forecastContainer.append(col);
+    for (let index = 0; index < dailyForecast.length; index++) {
+        if(dailyForecast[index].dt >= startDate && dailyForecast[index] < endDate){
+            displayForecast(dailyForecast[index],timezone);
+        }; 
+    }
 }
 
 function displayItems(city,data){
-    displayCurrWeath();
-    displayForecast();
+    displayCurrWeath(city,data.current,data.timezone);
+    displayWeekForecast(data.daily,data.timezone);
 };
 
 function fetchCoord(search){
@@ -102,15 +124,16 @@ function fetchCoord(search){
 
 function fetchWeath(location){
     var {lat}=location;
-    var {long}=location;
+    var {lon}=location;
     var city=location.name;
-    var apiUrl=`${weathAPIrootUrl}/data/2.5/onecall?lat=${lat}&lon=${long}&units=imperial&exclude=minutely,hourly&appid=${APIkey}`
+    var apiUrl=`${weathAPIrootUrl}/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${APIkey}`
     
     fetch(apiUrl)
         .then(function(res){
             return res.json();
         })
         .then(function(data){
+            console.log(data);
             displayItems(city,data);
         })
         .catch(function(err){
