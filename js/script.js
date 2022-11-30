@@ -4,6 +4,8 @@ const searchForm=document.querySelector('#search-form');
 const searchInp=document.querySelector('#search-input');
 const currWeathCol=document.querySelector('#current');
 const forecastContainer=document.querySelector('#forecast');
+const history=document.querySelector('#search-history');
+const searchHist=[];
 const testdata={
     "lat": 39.7392,
     "lon": -104.9849,
@@ -348,7 +350,7 @@ const testdata={
             "uvi": 3
         }
     ]
-}
+};
 
 
 dayjs.extend(window.dayjs_plugin_utc);
@@ -442,7 +444,6 @@ function displayWeekForecast(dailyForecast,timezone){
     for (let index = 0; index < 5; index++) {
         if(dailyForecast[index].dt >= startDate && dailyForecast[index] < endDate){
         }; 
-        console.log("asdf");
         displayForecast(dailyForecast[index],timezone);
     }
 }
@@ -450,7 +451,6 @@ function displayWeekForecast(dailyForecast,timezone){
 function displayItems(city,data){
     displayCurrWeath(city,data.current,data.timezone);
     displayWeekForecast(data.daily,data.timezone);
-    console.log("working?");
 };
 
 function fetchCoord(search){
@@ -496,6 +496,34 @@ function fetchWeath(){
     displayItems("Denver",testdata);
 };
 
+function displayHist(){
+    history.innerHTML='';
+
+    for(let index=searchHist.length-1;index>=0;i--){
+        var searched=document.createElement('li');
+        searched.setAttribute('data-search',searchHist[index]);
+        searched.textContent=searchHist[index];
+        history.append(searched);
+    }
+};
+
+function saveHist(){
+    if(searchHist.indexOf(search)!==-1){
+        return;
+    }
+    searchHist.push(search);
+    localStorage.setItem('search-history',JSON.stringify(searchHist));
+    displayHist();
+};
+
+function getHist(){
+    const savedHist=localStorage.getItem('search-history',JSON.stringify(searchHist));
+    if(savedHist){
+        searchHist=JSON.parse(savedHist);
+    }
+    displayHist();
+};
+
 function handleSearchFormSubmit(event){
     if(!searchInp.value){
         return;
@@ -506,4 +534,5 @@ function handleSearchFormSubmit(event){
     searchInp.value='';
 };
 
+getHist();
 searchForm.addEventListener('submit', handleSearchFormSubmit);
