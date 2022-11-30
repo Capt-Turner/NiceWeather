@@ -440,6 +440,7 @@ function displayWeekForecast(dailyForecast,timezone){
     head.textContent="--Weekly Forecast--";
 
     col.append(head);
+    forecastContainer.innerHTML='';
     forecastContainer.append(col);
     for (let index = 0; index < 5; index++) {
         if(dailyForecast[index].dt >= startDate && dailyForecast[index] < endDate){
@@ -456,44 +457,41 @@ function displayItems(city,data){
 function fetchCoord(search){
     var apiUrl=`${weathAPIrootUrl}/geo/1.0/direct?q=${search}&limit=5&appid=${APIkey}`;
 
-    fetchWeath();
-    // fetch(apiUrl)
-    //     .then(function(res){
-    //         return res.json();
-    //     })
-    //     .then(function(data){
-    //         if(!data[0]){
-    //             alert('Location not found/invalid');
-    //         } else{
-    //             fetchWeath(data[0]);
-    //         }
-    //     })
-    //     .catch(function(err){
-    //         console.error(err);
-    //     })
+    fetch(apiUrl)
+        .then(function(res){
+            return res.json();
+        })
+        .then(function(data){
+            if(!data[0]){
+                alert('Location not found/invalid');
+            } else{
+                fetchWeath(data[0]);
+            }
+        })
+        .catch(function(err){
+            console.error(err);
+        })
 
 
 };
 
-function fetchWeath(){
+function fetchWeath(location){
     var {lat}=location;
     var {lon}=location;
     var city=location.name;
     var apiUrl=`${weathAPIrootUrl}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${APIkey}`
     
-    // fetch(apiUrl)
-    //     .then(function(res){
-    //         return res.json();
-    //     })
-    //     .then(function(data){
-    //         console.log(data);
-    //         displayItems(city,data);
-    //     })
-    //     .catch(function(err){;
-    //         console.error(err);
-    //     });
-    console.log(testdata);
-    displayItems("Denver",testdata);
+    fetch(apiUrl)
+        .then(function(res){
+            return res.json();
+        })
+        .then(function(data){
+            console.log(data);
+            displayItems(city,data);
+        })
+        .catch(function(err){;
+            console.error(err);
+        });
 };
 
 function displayHist(){
